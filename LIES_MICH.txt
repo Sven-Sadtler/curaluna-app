@@ -1,10 +1,7 @@
-CURALUNA – Web-Prototyp Version 3 für Samsung Galaxy S22
+CURALUNA v7 – Vollbild-Korrektur
 
-Änderung gegenüber V2:
-- iPhone-Statusleiste und Dynamic Island am oberen Rand entfernt.
-- iPhone-Home-Indikator am unteren Rand entfernt.
-- Bildausschnitt an ein typisches Android-Hochformat angepasst.
-- Alle 68 Ansichten enthalten.
+Diese ZIP enthält nur die drei Dateien, die im GitHub-Hauptverzeichnis ersetzt werden müssen: index.html, manifest.webmanifest und sw.js. Die vorhandenen 68 Bilder im Ordner screens bleiben unverändert.
 
-Die Ansichten zeigen nur die bereitgestellten Screenshots; die Bedienung ist eine Demo und muss im realen Ablauf noch geprüft werden.
-Für die Installation als Web-App muss der Ordner über HTTPS bereitgestellt werden. Dann in Chrome öffnen > Menü > „Zum Startbildschirm hinzufügen“/„App installieren“.
+Ziel: Das Bildschirmbild füllt die verfügbare App-Fläche ohne blauen Außenrand; die Proportionen werden zugunsten des gewünschten Vollbilds minimal angepasst. Das Manifest fordert den Fullscreen-Anzeigemodus an, soweit Android/Chrome ihn für installierte Web-Apps unterstützt.
+
+Nach dem Upload und Commit kann es erforderlich sein, die installierte Verknüpfung/App zu entfernen und erneut über Chrome zu installieren, damit der geänderte Manifest-Anzeigemodus übernommen wird. Android kann Systemleisten abhängig von Gerät/Version weiterhin einblenden; eine Webseite kann sie nicht in jedem Zustand erzwingen verdecken.
