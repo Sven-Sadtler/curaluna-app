@@ -1,0 +1,10 @@
+CURALUNA – Web-Prototyp Version 3 für Samsung Galaxy S22
+
+Änderung gegenüber V2:
+- iPhone-Statusleiste und Dynamic Island am oberen Rand entfernt.
+- iPhone-Home-Indikator am unteren Rand entfernt.
+- Bildausschnitt an ein typisches Android-Hochformat angepasst.
+- Alle 68 Ansichten enthalten.
+
+Die Ansichten zeigen nur die bereitgestellten Screenshots; die Bedienung ist eine Demo und muss im realen Ablauf noch geprüft werden.
+Für die Installation als Web-App muss der Ordner über HTTPS bereitgestellt werden. Dann in Chrome öffnen > Menü > „Zum Startbildschirm hinzufügen“/„App installieren“.

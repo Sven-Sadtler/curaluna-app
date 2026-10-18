@@ -1,0 +1,9 @@
+{
+  "name": "CURALUNA",
+  "short_name": "CURALUNA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1769c2",
+  "theme_color": "#1769c2",
+  "orientation": "portrait"
+}
