@@ -3,10 +3,13 @@
   "name": "CURALUNA",
   "short_name": "CURALUNA",
   "description": "Interaktive CURALUNA-Demo mit festgelegter Navigation",
-  "start_url": "./index.html?start=screen_004",
+  "start_url": "./index.html?launch=home",
   "scope": "./",
   "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone"],
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait"
