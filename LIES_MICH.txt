@@ -1,7 +1,0 @@
-CURALUNA v7 – Vollbild-Korrektur
-
-Diese ZIP enthält nur die drei Dateien, die im GitHub-Hauptverzeichnis ersetzt werden müssen: index.html, manifest.webmanifest und sw.js. Die vorhandenen 68 Bilder im Ordner screens bleiben unverändert.
-
-Ziel: Das Bildschirmbild füllt die verfügbare App-Fläche ohne blauen Außenrand; die Proportionen werden zugunsten des gewünschten Vollbilds minimal angepasst. Das Manifest fordert den Fullscreen-Anzeigemodus an, soweit Android/Chrome ihn für installierte Web-Apps unterstützt.
-
-Nach dem Upload und Commit kann es erforderlich sein, die installierte Verknüpfung/App zu entfernen und erneut über Chrome zu installieren, damit der geänderte Manifest-Anzeigemodus übernommen wird. Android kann Systemleisten abhängig von Gerät/Version weiterhin einblenden; eine Webseite kann sie nicht in jedem Zustand erzwingen verdecken.
