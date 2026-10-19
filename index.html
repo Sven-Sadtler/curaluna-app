@@ -30,62 +30,85 @@ body{overscroll-behavior:none;user-select:none;-webkit-user-select:none}
   urgentCalibration:'screen_030.png', urgentHistory:'screen_031.png', urgentDetail:'screen_033.png',
   extra:'Bild extra 1.png'
  };
- let state='start', startPoint=null;
+ let state='start',startPoint=null;
  function show(s){if(!files[s])return;state=s;img.src='./screens/'+encodeURIComponent(files[s]);}
+ // Each neighboring pair in the supplied diagram can be traversed by the indicated
+ // left/right swipe. A swipe in the opposite direction returns to the previous view.
+ const horizontal={
+  start:{left:'planned'},
+  planned:{right:'start',left:'formTop'},
+  formTop:{right:'planned',left:'formBottom'},
+  formBottom:{right:'formTop',left:'calibration'},
+  calibration:{right:'formBottom',left:'actions'},
+  actions:{right:'calibration',left:'history'},
+  history:{right:'actions',left:'detail'},
+  detail:{right:'history'},
+  urgent:{left:'urgentTop'},
+  urgentTop:{right:'urgent',left:'urgentBottom'},
+  urgentBottom:{right:'urgentTop',left:'urgentCalibration'},
+  urgentCalibration:{right:'urgentBottom',left:'urgentHistory'},
+  urgentHistory:{right:'urgentCalibration',left:'urgentDetail'},
+  urgentDetail:{right:'urgentHistory'}
+ };
+ const vertical={
+  planned:{down:'urgent'},
+  urgent:{up:'planned'},
+  actions:{down:'urgent'},
+  urgentCalibration:{up:'urgentBottom'},
+  history:{down:'actions'},
+  detail:{down:'actions'},
+  urgentHistory:{down:'urgentCalibration'},
+  urgentDetail:{down:'urgentCalibration'}
+ };
  function point(e){const r=app.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height}}
  function tap(p){
-  // Visible controls are clickable only on screens and areas shown in the user's diagram.
-  if(state==='planned' && p.y>.68 && p.y<.88 && p.x>.12&&p.x<.90){show('formTop');return}
-  if(state==='urgent' && p.y>.68 && p.y<.88 && p.x>.12&&p.x<.90){show('urgentTop');return}
-  if(state==='formBottom' && p.y>.78 && p.y<.95 && p.x>.08&&p.x<.93){show('calibration');return}
-  if(state==='urgentBottom' && p.y>.78 && p.y<.95 && p.x>.08&&p.x<.93){show('urgentCalibration');return}
-  if(['calibration','actions','urgentCalibration'].includes(state)){
-   if(p.y>.88 && p.x<.25){show(state==='urgentCalibration'?'urgent':'actions');return}
-   if(p.y>.88 && p.x>.25&&p.x<.52){show(state==='urgentCalibration'?'urgentHistory':'history');return}
+  // Main action button on the planned/urgent action card.
+  if(state==='planned'&&p.y>.67&&p.y<.88&&p.x>.10&&p.x<.92){show('formTop');return}
+  if(state==='urgent'&&p.y>.67&&p.y<.88&&p.x>.10&&p.x<.92){show('urgentTop');return}
+  // Form confirmation button.
+  if(state==='formBottom'&&p.y>.77&&p.y<.95&&p.x>.07&&p.x<.94){show('calibration');return}
+  if(state==='urgentBottom'&&p.y>.77&&p.y<.95&&p.x>.07&&p.x<.94){show('urgentCalibration');return}
+  // Bottom navigation: Aktionen / Historie, where visible in the screenshots.
+  if(p.y>.88&&p.x<.27){
+   if(state.startsWith('urgent'))show('urgent');else show('start');
+   return;
   }
-  if(state==='history'&&p.y>.18&&p.y<.88){show('detail');return}
-  if(state==='urgentHistory'&&p.y>.18&&p.y<.88){show('urgentDetail');return}
-  if(['detail','urgentDetail'].includes(state)&&p.y>.88&&p.x<.25){show(state==='urgentDetail'?'urgent':'actions');return}
-  // The bottom navigation's "Aktionen" item is an explicit route back.
-  if(p.y>.88&&p.x<.25){show(state.startsWith('urgent')?'urgent':'actions');return}
+  if(p.y>.88&&p.x>=.27&&p.x<.52){
+   show(state.startsWith('urgent')?'urgentHistory':'history');return;
+  }
+  // Tap a history row to open its detail.
+  if(state==='history'&&p.y>.18&&p.y<.86){show('detail');return}
+  if(state==='urgentHistory'&&p.y>.18&&p.y<.86){show('urgentDetail');return}
+  // In detail, the back/action tab returns to the action view.
+  if((state==='detail'||state==='urgentDetail')&&p.y>.88&&p.x<.27){show(state==='urgentDetail'?'urgent':'start');return}
  }
- function swipe(dx,dy,from){
-  const ax=Math.abs(dx),ay=Math.abs(dy);
-  // Start / action screens: lateral swipes toggle the planned and urgent routes.
-  if(state==='start'){if(ax>ay*1.1){show('planned');return true}return false}
-  if(state==='planned'){
-   if(ax>ay*1.1){show('start');return true}
-   if(dy>0&&ay>ax*1.1){show('urgent');return true}
+ function swipe(dx,dy){
+  const ax=Math.abs(dx),ay=Math.abs(dy),threshold=Math.max(28,Math.min(app.clientWidth,app.clientHeight)*.045);
+  if(Math.max(ax,ay)<threshold)return false;
+  if(ax>ay*1.15){
+   const dir=dx<0?'left':'right',next=horizontal[state]?.[dir];
+   if(next){show(next);return true}
    return false;
   }
-  if(state==='urgent'){
-   if(ax>ay*1.1){show('start');return true}
-   if(dy<0&&ay>ax*1.1){show('planned');return true}
+  if(ay>ax*1.15){
+   const dir=dy<0?'up':'down',next=vertical[state]?.[dir];
+   if(next){show(next);return true}
    return false;
   }
-  // Forms: vertical swipe down scrolls to the lower form; opposite direction returns.
-  if(state==='formTop'){if(dy<0&&ay>ax){show('formBottom');return true}if(ax>ay){show('calibration');return true}return false}
-  if(state==='formBottom'){if(dy>0&&ay>ax){show('formTop');return true}if(ax>ay){show('calibration');return true}return false}
-  if(state==='urgentTop'){if(dy<0&&ay>ax){show('urgentBottom');return true}if(ax>ay){show('urgentCalibration');return true}return false}
-  if(state==='urgentBottom'){if(dy>0&&ay>ax){show('urgentTop');return true}if(ax>ay){show('urgentCalibration');return true}return false}
-  // Adjacent action / calibration screens can be reached in either lateral direction.
-  if(state==='calibration'){if(ax>ay){show('actions');return true}if(dy>0&&ay>ax){show('formBottom');return true}return false}
-  if(state==='actions'){if(ax>ay){show('calibration');return true}if(dy>0&&ay>ax){show('urgentCalibration');return true}return false}
-  if(state==='urgentCalibration'){if(ax>ay){show('urgent');return true}if(dy<0&&ay>ax){show('urgentBottom');return true}return false}
-  // History and details: lateral swipes go between list and selected detail.
-  if(state==='history'){if(ax>ay){show('detail');return true}if(dy>0&&ay>ax){show('actions');return true}return false}
-  if(state==='detail'){if(ax>ay){show('history');return true}if(dy>0&&ay>ax){show('actions');return true}return false}
-  if(state==='urgentHistory'){if(ax>ay){show('urgentDetail');return true}if(dy>0&&ay>ax){show('urgentCalibration');return true}return false}
-  if(state==='urgentDetail'){if(ax>ay){show('urgentHistory');return true}if(dy>0&&ay>ax){show('urgentCalibration');return true}return false}
   return false;
  }
  app.addEventListener('pointerdown',e=>{startPoint={x:e.clientX,y:e.clientY};try{app.setPointerCapture(e.pointerId)}catch{};e.preventDefault()},{passive:false});
- app.addEventListener('pointerup',e=>{if(!startPoint)return;const dx=e.clientX-startPoint.x,dy=e.clientY-startPoint.y;const threshold=Math.max(28,Math.min(app.clientWidth,app.clientHeight)*.045);if(Math.abs(dx)>threshold||Math.abs(dy)>threshold)swipe(dx,dy,startPoint);else tap(point(e));startPoint=null;e.preventDefault()},{passive:false});
+ app.addEventListener('pointerup',e=>{
+  if(!startPoint)return;
+  const dx=e.clientX-startPoint.x,dy=e.clientY-startPoint.y;
+  if(Math.hypot(dx,dy)>Math.max(28,Math.min(app.clientWidth,app.clientHeight)*.045))swipe(dx,dy);
+  else tap(point(e));
+  startPoint=null;e.preventDefault();
+ },{passive:false});
  app.addEventListener('pointercancel',()=>startPoint=null);
- // Every new document launch always starts at screen_004.
+ // Every fresh page/app launch starts on screen_004, never the previous state.
  show('start');
  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
 </script>
-</body>
-</html>
+</body></html>
