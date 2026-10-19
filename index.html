@@ -5,57 +5,66 @@
 <style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000;touch-action:none}body{overscroll-behavior:none;user-select:none;-webkit-user-select:none}#app{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#000;touch-action:none}#screen{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;object-position:center;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}</style></head>
 <body><main id="app" aria-label="CURALUNA Vollbild-Demo"><img id="screen" src="./screens/screen_004.png" alt="CURALUNA" draggable="false"></main>
 <script>(()=>{
-const app=document.getElementById('app'),img=document.getElementById('screen');
-const files={
- S01:'screen_004.png',S02:'screen_011.png',S03:'screen_013.png',S04:'screen_014.png',S05:'screen_015.png',S06:'screen_016.png',S07:'screen_018.png',S08:'screen_020.png',S09:'screen_026.png',S10:'screen_028.png',S11:'screen_029.png',S12:'screen_030.png',S13:'Bild extra 1.png',S14:'screen_031.png',S15:'screen_033.png'
-};
-let state='S01',startPoint=null;
-function show(s){if(!files[s])return;state=s;img.src='./screens/'+encodeURIComponent(files[s]);}
-// Navigation exactly follows the filled-in Excel table, plus the three corrections confirmed by the user.
-const swipeMap={
- S01:{left:'S02'},
- S02:{left:'S03',right:'S01',up:'S09'},
- S03:{left:'S04',right:'S02',up:'S04'},
- S04:{left:'S05',right:'S03',down:'S03'},
- S05:{left:'S06',right:'S04'},
- S06:{left:'S07',right:'S05'},
- S07:{left:'S08',right:'S06'},
- S08:{right:'S07'},
- S09:{left:'S10',down:'S02'},
- S10:{left:'S11',right:'S09',up:'S11'},
- S11:{left:'S12',right:'S10',down:'S10'},
- S12:{left:'S13',right:'S11'},
- S13:{left:'S14',right:'S12'},
- S14:{left:'S15',right:'S13'},
- S15:{right:'S14'}
-};
-function point(e){const r=app.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height}}
-function tap(p){
- // The Actions navigation item is a global shortcut to S01 on every screen.
- // The bottom-left tab is the Actions item in the supplied screenshots.
- if(p.y>.88&&p.x<.27){show('S01');return true;}
- // The bottom Historie item opens the corresponding history screen where available.
- if(p.y>.88&&p.x>=.27&&p.x<.52){if(state==='S06')show('S07');else if(state==='S13')show('S14');return true;}
- // Main action cards: the visible action area opens the appropriate form.
- if(state==='S02'&&p.y>.67&&p.y<.88&&p.x>.10&&p.x<.92){show('S03');return true;}
- if(state==='S09'&&p.y>.67&&p.y<.88&&p.x>.10&&p.x<.92){show('S10');return true;}
- // Confirmation button on the lower form view.
- if(state==='S04'&&p.y>.77&&p.y<.95&&p.x>.07&&p.x<.94){show('S05');return true;}
- if(state==='S11'&&p.y>.77&&p.y<.95&&p.x>.07&&p.x<.94){show('S12');return true;}
- // Header back arrow (top-left) on the two form views.
- if((state==='S03'||state==='S04')&&p.y<.16&&p.x<.22){show('S02');return true;}
- if((state==='S10'||state==='S11')&&p.y<.16&&p.x<.22){show('S09');return true;}
- // Tapping a history row opens the corresponding detail screen.
- if(state==='S07'&&p.y>.18&&p.y<.86){show('S08');return true;}
- if(state==='S14'&&p.y>.18&&p.y<.86){show('S15');return true;}
- return false;
-}
-function swipe(dx,dy){const ax=Math.abs(dx),ay=Math.abs(dy),threshold=Math.max(28,Math.min(app.clientWidth,app.clientHeight)*.045);if(Math.max(ax,ay)<threshold)return false;
- if(ax>ay*1.15){const dir=dx<0?'left':'right',next=swipeMap[state]?.[dir];if(next){show(next);return true;}return false;}
- if(ay>ax*1.15){const dir=dy<0?'up':'down',next=swipeMap[state]?.[dir];if(next){show(next);return true;}return false;}return false;}
-app.addEventListener('pointerdown',e=>{startPoint={x:e.clientX,y:e.clientY};try{app.setPointerCapture(e.pointerId)}catch{};e.preventDefault()},{passive:false});
-app.addEventListener('pointerup',e=>{if(!startPoint)return;const dx=e.clientX-startPoint.x,dy=e.clientY-startPoint.y;if(Math.hypot(dx,dy)>Math.max(28,Math.min(app.clientWidth,app.clientHeight)*.045))swipe(dx,dy);else tap(point(e));startPoint=null;e.preventDefault();},{passive:false});
-app.addEventListener('pointercancel',()=>startPoint=null);
-// Every fresh launch begins on the start screen S01.
-show('S01');if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ const app=document.getElementById('app'),img=document.getElementById('screen');
+ const files={
+  S01:'screen_004.png',S02:'screen_011.png',S03:'screen_013.png',S04:'screen_014.png',
+  S05:'screen_015.png',S06:'screen_016.png',S07:'screen_018.png',S08:'screen_020.png',
+  S09:'screen_026.png',S10:'screen_028.png',S11:'screen_029.png',S12:'screen_030.png',
+  S13:'Bild extra 1.png',S14:'screen_031.png',S15:'screen_033.png'
+ };
+ let state='S01',startPoint=null;
+ function show(s){if(!files[s])return;state=s;img.src='./screens/'+encodeURIComponent(files[s]);}
+ // Swipe directions match the completed Excel table, with the confirmed correction S02 down -> S09.
+ const swipeMap={
+  S01:{left:'S02'},
+  S02:{left:'S03',right:'S01',down:'S09'},
+  S03:{left:'S04',right:'S02',up:'S04'},
+  S04:{left:'S05',right:'S03',down:'S03'},
+  S05:{left:'S06',right:'S04'},
+  S06:{left:'S07',right:'S05'},
+  S07:{left:'S08',right:'S06'},
+  S08:{right:'S07'},
+  S09:{left:'S10',down:'S02'},
+  S10:{left:'S11',right:'S09',up:'S11'},
+  S11:{left:'S12',right:'S10',down:'S10'},
+  S12:{left:'S13',right:'S11'},
+  S13:{left:'S14',right:'S12'},
+  S14:{left:'S15',right:'S13'},
+  S15:{right:'S14'}
+ };
+ function point(e){const r=app.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height}}
+ function tap(p){
+  // Actions navigation item: global shortcut to S01 on every screen, as confirmed by the user.
+  if(p.y>.88&&p.x<.27){show('S01');return true;}
+  // History tab on the two action screens specified in the spreadsheet.
+  if(p.y>.88&&p.x>=.27&&p.x<.52){
+   if(state==='S06'){show('S07');return true;}
+   if(state==='S13'){show('S14');return true;}
+  }
+  // Wechseln action on the two action overview screens.
+  if(state==='S02'&&p.y>.67&&p.y<.88&&p.x>.10&&p.x<.92){show('S03');return true;}
+  if(state==='S09'&&p.y>.67&&p.y<.88&&p.x>.10&&p.x<.92){show('S10');return true;}
+  // Confirmation on lower form views.
+  if(state==='S04'&&p.y>.77&&p.y<.95&&p.x>.07&&p.x<.94){show('S05');return true;}
+  if(state==='S11'&&p.y>.77&&p.y<.95&&p.x>.07&&p.x<.94){show('S12');return true;}
+  // Header back arrow on the form views.
+  if((state==='S03'||state==='S04')&&p.y<.16&&p.x<.22){show('S02');return true;}
+  if((state==='S10'||state==='S11')&&p.y<.16&&p.x<.22){show('S09');return true;}
+  // Tapping a history entry opens the matching detail view.
+  if(state==='S07'&&p.y>.18&&p.y<.86){show('S08');return true;}
+  if(state==='S14'&&p.y>.18&&p.y<.86){show('S15');return true;}
+  return false;
+ }
+ function swipe(dx,dy){
+  const ax=Math.abs(dx),ay=Math.abs(dy),threshold=Math.max(28,Math.min(app.clientWidth,app.clientHeight)*.045);
+  if(Math.max(ax,ay)<threshold)return false;
+  if(ax>ay*1.15){const dir=dx<0?'left':'right',next=swipeMap[state]?.[dir];if(next){show(next);return true;}return false;}
+  if(ay>ax*1.15){const dir=dy<0?'up':'down',next=swipeMap[state]?.[dir];if(next){show(next);return true;}return false;}
+  return false;
+ }
+ app.addEventListener('pointerdown',e=>{startPoint={x:e.clientX,y:e.clientY};try{app.setPointerCapture(e.pointerId)}catch{};e.preventDefault()},{passive:false});
+ app.addEventListener('pointerup',e=>{if(!startPoint)return;const dx=e.clientX-startPoint.x,dy=e.clientY-startPoint.y;if(Math.hypot(dx,dy)>Math.max(28,Math.min(app.clientWidth,app.clientHeight)*.045))swipe(dx,dy);else tap(point(e));startPoint=null;e.preventDefault();},{passive:false});
+ app.addEventListener('pointercancel',()=>startPoint=null);
+ // Every fresh launch starts at S01.
+ show('S01');if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();</script></body></html>
