@@ -1,4 +1,4 @@
-const CACHE='curaluna-v9-nav-20261019';
-self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE));});
-self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==CACHE)await caches.delete(k);await self.clients.claim();})());});
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith((async()=>{try{const r=await fetch(e.request);const u=new URL(e.request.url);if(u.origin===location.origin){const c=await caches.open(CACHE);c.put(e.request,r.clone());}return r;}catch{const c=await caches.open(CACHE);return await c.match(e.request)||Response.error();}})());});
+const CACHE='curaluna-v10-logo-nav-20261019';
+self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE));});
+self.addEventListener('activate',event=>{event.waitUntil((async()=>{for(const key of await caches.keys())if(key!==CACHE)await caches.delete(key);await self.clients.claim();})());});
+self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith((async()=>{try{const response=await fetch(event.request);const url=new URL(event.request.url);if(url.origin===location.origin&&response.ok){const cache=await caches.open(CACHE);cache.put(event.request,response.clone());}return response;}catch{const cache=await caches.open(CACHE);return await cache.match(event.request)||Response.error();}})());});
